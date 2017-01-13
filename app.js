@@ -5,6 +5,9 @@ var app = express()
 // setting bodyParser for text
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// setting for passing JSON
+app.use(bodyParser.json());
+
 // static page to be served when contacted
 app.use('/',express.static(__dirname + '/public'))
 
