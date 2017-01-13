@@ -1,7 +1,21 @@
+window.onload = function() {
+    $.ajax({
+      url: "/list",
+      type: "POST",
+      contentType: "application/json",
+      dataType: "json",
+      success: function(data) {
+       console.log("data passed back from server is:" + data)
+      },
+      error: function(err) {
+         console.log("an error occured")
+         console.log(err)
+      }
+    })
+};
+
 function ajaxRawFunc(){
-
       var inputData = document.getElementById('input1').value
-
       $.ajax({
         url: "/pass",
         type: "POST",
@@ -18,11 +32,8 @@ function ajaxRawFunc(){
       })
 }
 
-
 function ajaxJSONFunc(){
-
       var inputData = document.getElementById('input2').value
-
       $.ajax({
         url: "/pass",
         type: "POST",
