@@ -6,6 +6,12 @@ window.onload = function() {
       dataType: "json",
       success: function(data) {
        console.log("data passed back from server is:" + data)
+
+       // Convert JSON objects into a string readable format
+       console.log(JSON.stringify(data))
+
+       // populateTable()
+       console.log(getRowCount(data))
       },
       error: function(err) {
          console.log("an error occured")
@@ -13,6 +19,23 @@ window.onload = function() {
       }
     })
 };
+
+// Get the count of objects returned - each object being a set of properties
+function getRowsCount(_obj){
+  var count = Object.keys(_obj).length
+  return count
+}
+
+function getEntriesCount(_obj){
+  var count = 0;
+  _obj.forEach(function(element){
+    count = count + 1:
+  } return count )
+}
+
+function populateTable(){
+    $('#myTableData').append('<tr><td>test 2</td><td>test 3</td></tr>')
+}
 
 function ajaxRawFunc(){
       var inputData = document.getElementById('input1').value
