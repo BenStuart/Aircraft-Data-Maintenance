@@ -8,10 +8,13 @@ window.onload = function() {
        console.log("data passed back from server is:" + data)
 
        // Convert JSON objects into a string readable format
-       console.log(JSON.stringify(data))
+       //console.log(JSON.stringify(data))
 
+       //console.log(getRowsCount(data))
        // populateTable()
-       console.log(getRowCount(data))
+       //console.log(getEntriesCount(data))
+
+       populateTable(data)
       },
       error: function(err) {
          console.log("an error occured")
@@ -26,15 +29,25 @@ function getRowsCount(_obj){
   return count
 }
 
+// Get the maximum number of properties from the largest object
 function getEntriesCount(_obj){
   var count = 0;
   _obj.forEach(function(element){
-    count = count + 1:
-  } return count )
+    tempCount = Object.keys(element).length
+      if(count < tempCount ){
+        count = tempCount
+      }
+  })
+  return count
 }
 
-function populateTable(){
-    $('#myTableData').append('<tr><td>test 2</td><td>test 3</td></tr>')
+function populateTable(_obj){
+  for (var i=0; i < getRowsCount(_obj); i++){
+        $('tbody').append('<tr></tr>')
+        for (var y=0; y < getEntriesCount; y ++){
+          $('td').append('<td></td>')
+        }
+  }
 }
 
 function ajaxRawFunc(){
