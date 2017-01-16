@@ -1,3 +1,29 @@
+var app = angular.module('myApp', [])
+
+app.controller('myCtrl', function($scope, $http) {
+    $http({
+        method : "POST",
+        url : "/list"
+    }).then(function mySucces(response) {
+        $scope.myWelcome = response.data;
+        $scope.go = function(ai){
+          $scope.clicked =  ai.name
+        }
+        console.log(JSON.stringify(response.data))
+    }, function myError(response) {
+        $scope.myWelcome = response.statusText;
+    })
+})
+
+app.controller('addFormCtrl', function($scope){
+  $scope.myVar = true
+  $scope.toggle = function (){
+    $scope.myVar = !$scope.myVar
+  }
+})
+
+
+/*
 window.onload = function() {
     $.ajax({
       url: "/list",
@@ -8,13 +34,13 @@ window.onload = function() {
        console.log("data passed back from server is:" + data)
 
        // Convert JSON objects into a string readable format
-       //console.log(JSON.stringify(data))
+       console.log(JSON.stringify(data))
 
        //console.log(getRowsCount(data))
        // populateTable()
        //console.log(getEntriesCount(data))
 
-       populateTable(data)
+       //populateTable(data)
       },
       error: function(err) {
          console.log("an error occured")
@@ -23,13 +49,14 @@ window.onload = function() {
     })
 };
 
+/*
 // Get the count of objects returned - each object being a set of properties
 function getRowsCount(_obj){
   var count = Object.keys(_obj).length
   return count
 }
 
-// Get the maximum number of properties from the largest object
+// Get the maximum number of properties from the largest object(i.e row)
 function getEntriesCount(_obj){
   var count = 0;
   _obj.forEach(function(element){
@@ -84,4 +111,4 @@ function ajaxJSONFunc(){
            console.log(err)
         }
       })
-}
+} */

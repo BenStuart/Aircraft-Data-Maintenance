@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-
+ <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script type="text/javascript" src="/script.js"></script>
     <link rel="stylesheet" href="style.css">
     <meta charset="utf-8">
 
-    <title>Aircraft Data Maintenance</title>
+  <title>Aircraft Data Maintenance</title>
   </head>
   <body>
-    <form>
+   <!-- <form>
       <div class="inputAndButton">
   			<input type="text" id="input1" value ="">
   			<input type="button" value="Text Pass" onclick="ajaxRawFunc();">
@@ -19,17 +19,26 @@
         <input type="text" id="input2" value ="">
         <input type="button" value="JSON Pass" onclick="ajaxJSONFunc();">
       </div>
-      <div id="mydata">
-      <b>Generated Table</b>
-      <table id="myTableData"  border="1" cellpadding="2">
-          <tr>
-              <td><b>Id</b></td>
-              <td><b>Name</b></td>
-              <td><b>Location</b></td>
-          </tr>
+   </form> -->
+
+<div ng-app="myApp">
+   <div ng-controller="myCtrl">
+      <table border="1">
+        <tr ng-repeat="x in myWelcome" ng-click="go(x)">
+          <td>{{x.name}}</td>
+          <td>{{x.location}}</td>
+        </tr>
       </table>
-      </div>
-      </div>
-		</form>
+      <h4>Selected: {{clicked}}</h4>
+  </div>
+
+  <div ng-controller="addFormCtrl">
+    <button ng-click="toggle()"> Add Employee </button>
+    <form ng-hide="myVar">
+      <p>Name</p>
+    </form>
+  </div>
+</div>
+
   </body>
 </html>

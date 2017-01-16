@@ -1,12 +1,10 @@
 var express = require('express')
-var bodyParser = require('body-parser');
+var bodyParser = require('body-parser')
 var app = express()
-var mysql = require("mysql");
-
-var listArray = []
+var mysql = require("mysql")
 
 // setting bodyParser for text
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }))
 
 // setting for passing JSON
 app.use(bodyParser.json());
@@ -14,29 +12,32 @@ app.use(bodyParser.json());
 // static page to be served when contacted
 app.use('/',express.static(__dirname + '/public'))
 
-
-var con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
-  database: "practise"
-});
-
-con.connect(function(err){
-  if(err){
-    console.log("Error connecting to DB")
-    return
-  }
-  console.log('Connection established')
-})
-
 app.post('/list', function (req, res){
+  var listArray = []
+
+  // Identify connection params
+  var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "root",
+    database: "practise"
+  })
+
   // Establish connection to db
+  con.connect(function(err){
+    if(err){
+      console.log("Error connecting to DB")
+      return
+    }
+    console.log('Connection established')
+  })
+
+  // Query DB and store results in obj
   con.query('SELECT * FROM employees',function(err,rows){
     if(err) throw err;
-    for (var i = 0; i < rows.length; i++) {
+    for (var i = 0; i < rows.length; i++){
       listArray.push(rows[i])
-    };
+    }
     /*
     ar names = listArray.map(function(item) {
     return item;
