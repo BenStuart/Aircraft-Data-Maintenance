@@ -10,35 +10,49 @@
   <title>Aircraft Data Maintenance</title>
   </head>
   <body>
-   <!-- <form>
-      <div class="inputAndButton">
-  			<input type="text" id="input1" value ="">
-  			<input type="button" value="Text Pass" onclick="ajaxRawFunc();">
+    <div ng-app="myApp">
+
+      <!-- displaying and interacting with list section -->
+       <div ng-controller="listCtrl">
+          <table border="1">
+            <!-- ng-class used to {[css class to be used] : [compare current looped row with clicked row]} -->
+            <!-- selectedrow css will be apllied to row where row equals clicked row -->
+            <tr ng-repeat="x in data" ng-click="go(x)" ng-class="{'selectedrow': x.name === clicked}">
+              <td>{{x.name}}</td>
+              <td>{{x.location}}</td>
+            </tr>
+          </table>
+          <h4>Selected: {{clicked}}</h4>
       </div>
-      <div class="inputAndButton">
-        <input type="text" id="input2" value ="">
-        <input type="button" value="JSON Pass" onclick="ajaxJSONFunc();">
+
+<button class="addButton" ng-click="addToggle()"> Add </button>
+<button class="editButton" ng-click="updateToggle()"> Edit</button>
+
+<!-- <div ng-controller="updateEntryCtrl">
+  <button class="editButton" ng-click="toggle()"> Update </button>
+</div> -->
+
+      <!-- add form section -->
+      <div ng-controller="addFormCtrl">
+        <!-- <button class="addButton" ng-click="toggle()"> Add Employee </button> -->
+        <span ng-show="successOrFailureAlert"> {{status}} </span>
+        <form class="addButtonForm" ng-hide="addMyVar" ng-submit="submitAddEmployeeForm()">
+          <h3> Add Employee Form </h3>
+          <input type="text" ng-model="name">
+          <input type="text" ng-model="country">
+          <input type="submit" value="Submit" />
+        </form>
       </div>
-   </form> -->
 
-<div ng-app="myApp">
-   <div ng-controller="myCtrl">
-      <table border="1">
-        <tr ng-repeat="x in myWelcome" ng-click="go(x)">
-          <td>{{x.name}}</td>
-          <td>{{x.location}}</td>
-        </tr>
-      </table>
-      <h4>Selected: {{clicked}}</h4>
-  </div>
+      <div ng-controller="updateEntryCtrl">
+        <!-- <button class="editButton" ng-click="toggle()"> Edit Employee </button> -->
+        <form class="editButtonForm" ng-hide="updateMyVar" ng-submit="submitEditEmployeeForm()">
+          <input type="text" ng-model="name">
+          <input type="text" ng-model="country">
+          <input type="submit" value="Submit">
+        </form>
+      </div>
 
-  <div ng-controller="addFormCtrl">
-    <button ng-click="toggle()"> Add Employee </button>
-    <form ng-hide="myVar">
-      <p>Name</p>
-    </form>
-  </div>
-</div>
-
+    </div>
   </body>
 </html>

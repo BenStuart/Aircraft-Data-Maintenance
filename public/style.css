@@ -1,3 +1,16 @@
-.inputAndButton{
+.inputAndButton {
   margin:20px;
+}
+
+.selectedrow {
+  background-color: red;
+}
+
+.editButton, .addButton {
+  float: left;
+  margin: 10px;
+}
+
+.editButtonForm, .addButtonForm{
+  clear:both;
 }

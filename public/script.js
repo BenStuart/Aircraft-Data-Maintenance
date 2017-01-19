@@ -1,114 +1,200 @@
 var app = angular.module('myApp', [])
 
-app.controller('myCtrl', function($scope, $http) {
+// Data to be passed around between controllers
+app.service('Service', function($timeout){
+  var id = 0
+  var user = ""
+  var location = ""
+  var entrySelected = true
+  var toggle = true
+  var toReturn = false
+
+  // functions need to be returned from a service as vars are private scope
+  return {
+    CheckEntrySelected: function(){
+      return entrySelected
+    },
+    getUser: function(){
+      return user
+    },
+    getLocation: function(){
+      return location
+    },
+    ChangeEntrySelected: function(){
+      entrySelected = !entrySelected
+    },
+    setName: function(_user){
+      user = _user
+    },
+    setLocation: function(_location){
+      location = _location
+    },
+    getid: function(){
+      return id
+    },
+    setid: function(_id){
+      id = _id
+    }
+  }
+
+})
+
+app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
     $http({
         method : "POST",
         url : "/list"
     }).then(function mySucces(response) {
-        $scope.myWelcome = response.data;
-        $scope.go = function(ai){
-          $scope.clicked =  ai.name
+        $scope.clicked = null;
+        $scope.data = response.data;
+        $scope.go = function(data){
+
+          var lastclick = $scope.clicked
+          console.log("last clicked: " + lastclick)
+
+          $scope.clicked = data.name
+          console.log("scope clicked: " +  $scope.clicked)
+
+          console.log(data.id)
+
+          //Pass selected data to the service to be used by other controller
+          Service.setName(data.name)
+          Service.setLocation(data.location)
+          Service.setid(data.id)
+
+          //console.log("Data Passed From Table: " + data.name)
+          //console.log("Data Passed From Table: " + data.location)
+
+          // if clicking on the same row twice, removing the row selection
+          if($scope.clicked == lastclick){
+
+            console.log($rootScope.updateMyVar)
+            //make sure edit form is closed when switching/unselecting rows and values will change
+             if($rootScope.updateMyVar == false){
+               $rootScope.updateMyVar = !$rootScope.updateMyVar
+            }
+
+            //make sure add form is closed when making selections from list
+            if($rootScope.addMyVar == false){
+              $rootScope.addMyVar = !$rootScope.addMyVar
+            }
+
+             console.log("change entry triggered")
+             //Trigggers the "Please select an entry first"
+             Service.ChangeEntrySelected()
+             $scope.clicked = ""
+          }
+
+          // if not clicking for the first time and the last click was nothing i.e removing a selection
+          // but now clicking on something
+          else if ($scope.clicked != "" && lastclick != null && lastclick == ""){
+            console.log($rootScope.updateMyVar)
+            Service.ChangeEntrySelected()
+          }
+
+          else if ($scope.clicked != "" && lastclick != ""){
+              console.log("$rootScope.updateMyVar")
+              //make sure edit form is closed when switching/unselecting rows and values will change
+               if($rootScope.updateMyVar == false){
+                 $rootScope.updateMyVar = !$rootScope.updateMyVar
+              }
+
+              //make sure add form is closed when making selections from list
+              if($rootScope.addMyVar == false){
+                $rootScope.addMyVar = !$rootScope.addMyVar
+              }
+          }
+
         }
         console.log(JSON.stringify(response.data))
     }, function myError(response) {
-        $scope.myWelcome = response.statusText;
+        $scope.data = response.statusText;
     })
 })
 
-app.controller('addFormCtrl', function($scope){
-  $scope.myVar = true
-  $scope.toggle = function (){
-    $scope.myVar = !$scope.myVar
-  }
-})
+app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope, $http){
 
-
-/*
-window.onload = function() {
-    $.ajax({
-      url: "/list",
-      type: "POST",
-      contentType: "application/json",
-      dataType: "json",
-      success: function(data) {
-       console.log("data passed back from server is:" + data)
-
-       // Convert JSON objects into a string readable format
-       console.log(JSON.stringify(data))
-
-       //console.log(getRowsCount(data))
-       // populateTable()
-       //console.log(getEntriesCount(data))
-
-       //populateTable(data)
-      },
-      error: function(err) {
-         console.log("an error occured")
-         console.log(err)
-      }
-    })
-};
-
-/*
-// Get the count of objects returned - each object being a set of properties
-function getRowsCount(_obj){
-  var count = Object.keys(_obj).length
-  return count
-}
-
-// Get the maximum number of properties from the largest object(i.e row)
-function getEntriesCount(_obj){
-  var count = 0;
-  _obj.forEach(function(element){
-    tempCount = Object.keys(element).length
-      if(count < tempCount ){
-        count = tempCount
-      }
+  //Make sure other form is closed when opening this form
+  $scope.$watch('updateMyVar', function(){
+    if($rootScope.addMyVar == false){
+      console.log("add form is open, closing")
+      $rootScope.addMyVar =! $rootScope.addMyVar
+    }
   })
-  return count
-}
 
-function populateTable(_obj){
-  for (var i=0; i < getRowsCount(_obj); i++){
-        $('tbody').append('<tr></tr>')
-        for (var y=0; y < getEntriesCount; y ++){
-          $('td').append('<td></td>')
-        }
+  $rootScope.updateMyVar = true
+  $rootScope.updateToggle = function(){
+    console.log(Service.CheckEntrySelected())
+    if (Service.CheckEntrySelected() === false){
+          $window.alert("Please select a field to edit first")
+          return
+    }
+    $rootScope.updateMyVar = !$rootScope.updateMyVar
+    $scope.name = Service.getUser()
+    $scope.country = Service.getLocation()
+    $scope.id = Service.getid()
   }
-}
 
-function ajaxRawFunc(){
-      var inputData = document.getElementById('input1').value
-      $.ajax({
-        url: "/pass",
-        type: "POST",
-        data: inputData,
-        contentType: "application/x-www-form-urlencoded",
-        //dataType: "json", only use if you need to responce data to be JSON, if its not JSON an error will fire when uncommented. defaults to text
-        success: function(data) {
-         console.log("data passed back from server is:" + data)
-        },
-        error: function(err) {
-           console.log("an error occured")
-           console.log(err)
-        }
-      })
-}
+  $scope.submitEditEmployeeForm = function() {
+    $scope.employee = {name: $scope.name, country: $scope.country, id: $scope.id}
 
-function ajaxJSONFunc(){
-      var inputData = document.getElementById('input2').value
-      $.ajax({
-        url: "/pass",
-        type: "POST",
-        data: JSON.stringify({"data" : inputData}), //object needs to be stringified before sending
-        contentType: "application/json",
-        // dataType: "json", only use if you need to responce data to be JSON, if its not JSON an error will fire when uncommented. defaults to text
-        success: function(data) {
-         console.log("data passed back from server is:" + data)
-        },
-        error: function(err) {
-           console.log("an error occured")
-           console.log(err)
+    console.log($scope.name)
+    console.log($scope.country)
+    console.log($scope.id)
+
+    $http({
+      method : "POST",
+      url : "/update",
+      data: $scope.employee,
+    }).then(function mySucces(response) {
+      $rootScope.updateToggle = !$rootScope.updateToggle
+    }, function myError(response) {
+
+    })
+  }
+})
+
+app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootScope){
+  $rootScope.addMyVar = true
+
+    //Make sure other form is closed when opening this form
+    $scope.$watch('addMyVar', function(){
+      if($rootScope.updateMyVar == false){
+        console.log("edit form is open")
+        $rootScope.updateMyVar =! $rootScope.updateMyVar
+      }
+    })
+
+  $rootScope.addToggle = function (){
+    $rootScope.addMyVar = !$rootScope.addMyVar
+  }
+
+  $scope.submitAddEmployeeForm = function(){
+    //console.log("triggered")
+    //console.log($scope.name)
+    //console.log($scope.country)
+    $scope.employee = {name: $scope.name, country: $scope.country}
+    $http({
+      method : "POST",
+      url : "/add",
+      data: $scope.employee,
+    }).then(function mySucces(response) {
+
+        $rootScope.status = "Succesfully Added";
+        console.log(response.data.insertId)
+
+        $scope.addToggle = function (){
+          $rootScope.addMyVar = !$rootScope.addMyVar
         }
-      })
-} */
+
+        //once toggled i.e form taken away success or failure message displayed for x time
+        $scope.successOrFailureAlert = true;
+        $timeout(function () {$scope.successOrFailureAlert = false}, 2000)
+
+        $scope.name = ""
+        $scope.location = ""
+
+    }, function myError(response) {
+        $scope.status = "Add Was unsuccessful"
+    });
+  }
+})
