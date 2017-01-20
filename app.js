@@ -33,7 +33,7 @@ app.post('/list', function (req, res){
     console.log('Connection established')
   })
   // Query DB and store results in obj
-  con.query('SELECT * FROM employees',function(err,rows){
+  con.query('SELECT * FROM Aircraft',function(err,rows){
     if(err) throw err;
     for (var i = 0; i < rows.length; i++){
       listArray.push(rows[i])

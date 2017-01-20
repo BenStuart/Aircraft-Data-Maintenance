@@ -1,39 +1,58 @@
 var app = angular.module('myApp', [])
 
 // Data to be passed around between controllers
-app.service('Service', function($timeout){
+app.service('Service', function(){
   var id = 0
-  var user = ""
-  var location = ""
+  var ARego = ""
+  var AType = ""
+  var ADescription = ""
+  var AOdometer = 0
+  var AFlag = 0
   var entrySelected = true
-  var toggle = true
-  var toReturn = false
 
   // functions need to be returned from a service as vars are private scope
   return {
     CheckEntrySelected: function(){
       return entrySelected
     },
-    getUser: function(){
-      return user
+    setARego: function (_ARego){
+      ARego = _ARego
     },
-    getLocation: function(){
-      return location
+    getARego: function (){
+      return ARego
     },
-    ChangeEntrySelected: function(){
-      entrySelected = !entrySelected
+    setAType: function(_AType){
+      AType = _AType
     },
-    setName: function(_user){
-      user = _user
+    getAType: function(){
+      return AType
     },
-    setLocation: function(_location){
-      location = _location
+    setADescription: function(_ADescription){
+      ADescription = _ADescription
+    },
+    getADescription: function(){
+      return ADescription
+    },
+    setAOdometer: function(_AOdometer){
+      AOdometer = _AOdometer
+    },
+    getAOdometer: function(){
+      return AOdometer
+    },
+    setAFlag: function(_AFlag){
+      AFlag = _AFlag
+    },
+    getAFlag: function(){
+      return AFlag
     },
     getid: function(){
       return id
     },
     setid: function(_id){
       id = _id
+    },
+    ChangeEntrySelected: function(){
+      entrySelected = !entrySelected
     }
   }
 
@@ -47,27 +66,23 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
         $scope.clicked = null;
         $scope.data = response.data;
         $scope.go = function(data){
-
           var lastclick = $scope.clicked
-          console.log("last clicked: " + lastclick)
 
-          $scope.clicked = data.name
-          console.log("scope clicked: " +  $scope.clicked)
-
-          console.log(data.id)
-
+          $scope.clicked = data.ARego
+          //console.log("scope clicked: " +  $scope.clicked)
+          //console.log(data.ARego)
           //Pass selected data to the service to be used by other controller
-          Service.setName(data.name)
-          Service.setLocation(data.location)
-          Service.setid(data.id)
-
+          Service.setAType(data.AType)
+          Service.setARego(data.ARego)
+          Service.setAFlag(data.AFlag)
+          Service.setADescription(data.ADescription)
+          Service.setAOdometer(data.AOdometer)
           //console.log("Data Passed From Table: " + data.name)
           //console.log("Data Passed From Table: " + data.location)
 
           // if clicking on the same row twice, removing the row selection
           if($scope.clicked == lastclick){
-
-            console.log($rootScope.updateMyVar)
+            //console.log($rootScope.updateMyVar)
             //make sure edit form is closed when switching/unselecting rows and values will change
              if($rootScope.updateMyVar == false){
                $rootScope.updateMyVar = !$rootScope.updateMyVar
@@ -77,8 +92,7 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
             if($rootScope.addMyVar == false){
               $rootScope.addMyVar = !$rootScope.addMyVar
             }
-
-             console.log("change entry triggered")
+             //console.log("change entry triggered")
              //Trigggers the "Please select an entry first"
              Service.ChangeEntrySelected()
              $scope.clicked = ""
@@ -87,12 +101,12 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
           // if not clicking for the first time and the last click was nothing i.e removing a selection
           // but now clicking on something
           else if ($scope.clicked != "" && lastclick != null && lastclick == ""){
-            console.log($rootScope.updateMyVar)
+            //console.log($rootScope.updateMyVar)
             Service.ChangeEntrySelected()
           }
 
           else if ($scope.clicked != "" && lastclick != ""){
-              console.log("$rootScope.updateMyVar")
+              //console.log("$rootScope.updateMyVar")
               //make sure edit form is closed when switching/unselecting rows and values will change
                if($rootScope.updateMyVar == false){
                  $rootScope.updateMyVar = !$rootScope.updateMyVar
@@ -103,9 +117,8 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
                 $rootScope.addMyVar = !$rootScope.addMyVar
               }
           }
-
         }
-        console.log(JSON.stringify(response.data))
+        //console.log(JSON.stringify(response.data))
     }, function myError(response) {
         $scope.data = response.statusText;
     })
@@ -113,15 +126,20 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
 
 app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope, $http){
 
-  //Make sure other form is closed when opening this form
+  $rootScope.updateMyVar = true
+
+  //Check and make sure other form is closed when opening this form
   $scope.$watch('updateMyVar', function(){
     if($rootScope.addMyVar == false){
-      console.log("add form is open, closing")
-      $rootScope.addMyVar =! $rootScope.addMyVar
+      if($rootScope.updateMyVar == false){
+        console.log("add form is open, closing")
+        $rootScope.addMyVar =! $rootScope.addMyVar
+      }
     }
   })
 
-  $rootScope.updateMyVar = true
+  //Check if a valid field has been selected if so the edit button can open form
+  // and continue pre-adding fields otherwise alert
   $rootScope.updateToggle = function(){
     console.log(Service.CheckEntrySelected())
     if (Service.CheckEntrySelected() === false){
@@ -129,17 +147,23 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
           return
     }
     $rootScope.updateMyVar = !$rootScope.updateMyVar
-    $scope.name = Service.getUser()
-    $scope.country = Service.getLocation()
+
+    //Pre fill info into edit forms elements
+    $scope.ARego = Service.getARego()
+    $scope.selectedType = Service.getAType()
+    $scope.AType = ["Boeing 747","Harrier","JumpJet"]
     $scope.id = Service.getid()
+    $scope.ADescription = Service.getADescription()
+    $scope.AOdometer = Service.getAOdometer()
+    $scope.AFlag = Service.getAFlag()
   }
 
+  //When submit button pressed send to node server
   $scope.submitEditEmployeeForm = function() {
-    $scope.employee = {name: $scope.name, country: $scope.country, id: $scope.id}
 
-    console.log($scope.name)
-    console.log($scope.country)
-    console.log($scope.id)
+    //********************* UP TO HERE ************************
+    //object containing the aircraft values
+    $scope.Aircraft = {ARego: $scope.ARego, AType: $scope.AType, id: $scope.id}
 
     $http({
       method : "POST",
@@ -148,7 +172,6 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
     }).then(function mySucces(response) {
       $rootScope.updateToggle = !$rootScope.updateToggle
     }, function myError(response) {
-
     })
   }
 })
@@ -160,7 +183,9 @@ app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootSc
     $scope.$watch('addMyVar', function(){
       if($rootScope.updateMyVar == false){
         console.log("edit form is open")
-        $rootScope.updateMyVar =! $rootScope.updateMyVar
+        if($rootScope.addMyVar == false){
+          $rootScope.updateMyVar =! $rootScope.updateMyVar
+        }
       }
     })
 
