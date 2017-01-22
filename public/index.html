@@ -37,13 +37,13 @@
           <!-- <h4>Selected: {{clicked}}</h4> -->
       </div>
 
-<h4 class=status ng-show="successOrFailureAlert"> <span> {{status}} </span> </h4>
-<button class="Button" ng-click="addToggle()"> Add </button>
-<button class="Button" ng-click="updateToggle()"> Edit</button>
+      <h4 class=status ng-show="successOrFailureAlert"> <span> {{status}} </span> </h4>
+      <button class="Button" ng-click="addToggle()"> Add </button>
+      <button class="Button" ng-click="updateToggle()"> Edit</button>
 
-<div ng-controller="deletCtrl">
-<button type="Button" class="Button" ng-click="delete()"> Delete </button>
-</div>
+      <div ng-controller="deletCtrl">
+        <button type="Button" class="Button" ng-click="delete()"> Delete </button>
+      </div>
 
 <!-- <div ng-controller="updateEntryCtrl">
   <button class="editButton" ng-click="toggle()"> Update </button>
@@ -61,9 +61,9 @@
           <p> Description </p>
           <input type="text" ng-model="ADescription" />
           <p> Odometer </p>
-          <input type="number" ng-model="AOdometer" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" required/>
+          <input type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" ng-model="AOdometer" />
           <p> Flag </p>
-          <input type="number" ng-model="AFlag" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" required/>
+          <input type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" ng-model="AFlag" />
           <br>
           <input class="Submit" type="submit" value="Submit" />
           <button class="Submit" type="button" ng-click="addCancel()"> Cancel </button>

@@ -6,8 +6,8 @@ app.service('Service', function($timeout){
   var ARego = ""
   var AType = ""
   var ADescription = ""
-  var AOdometer = 0
-  var AFlag = 0
+  var AOdometer = 0.00
+  var AFlag = 0.00
   var entrySelected = null
 
   // functions need to be returned from a service as vars are private scope
@@ -55,30 +55,25 @@ app.service('Service', function($timeout){
       entrySelected = !entrySelected
     }
   }
-
 })
 
 app.controller('deletCtrl', function($scope, $window, Service, $rootScope, $http, $timeout) {
-
   $rootScope.delete = function(){
     if (Service.CheckEntrySelected() == false || Service.CheckEntrySelected() == null){
       $window.alert("Please select an entry first")
     }else{
-      if(Service.getAOdometer() < 500){
+      if(Service.getAOdometer() < 500.00){
         $window.alert("Aircraft cannot be deleted, Odometer reading too low")
       }else{
         if (confirm('Are you sure you want to delete: ' + Service.getARego())) {
-
           $http({
             method : "POST",
             url : "/delete",
             data: {"rego" : Service.getARego()}
           }).then(function mySucces(response) {
             $rootScope.status = "Entry Deleted"
-
             $rootScope.listed()
             Service.ChangeEntrySelected()
-
             $rootScope.successOrFailureAlert = true;
             //console.log($scope.successOrFailureAlert)
             $timeout(function () {$rootScope.successOrFailureAlert = false}, 1000)
@@ -92,7 +87,6 @@ app.controller('deletCtrl', function($scope, $window, Service, $rootScope, $http
 })
 
 app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
-
     $rootScope.listed = function() {
       $http({
           method : "POST",
@@ -104,15 +98,14 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
             var lastclick = $scope.clicked
             $scope.clicked = data.ARego
 
-            //console.log("Last Clicked: " + lastclick)
-            //console.log("scope clicked: " +  $scope.clicked)
-
             //console.log(data.ARego)
             //Pass selected data to the service to be used by other controller
             Service.setAType(data.AType)
             Service.setARego(data.ARego)
             Service.setAFlag(data.AFlag)
             Service.setADescription(data.ADescription)
+            console.log(data.AOdometer)
+            console.log(data.AFlag)
             Service.setAOdometer(data.AOdometer)
             Service.setid(data.id)
             console.log("Data id: " + data.id)
@@ -135,14 +128,12 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
                Service.ChangeEntrySelected()
                $scope.clicked = ""
             }
-
             // if not clicking for the first time and the last click was nothing i.e removing a selection
             // but now clicking on something
             else if ($scope.clicked != "" && lastclick != null && lastclick == ""){
               //console.log($rootScope.updateMyVar)
               Service.ChangeEntrySelected()
             }
-
             else if ($scope.clicked != "" && lastclick != "" ){
               //console.log("$rootScope.updateMyVar")
               //make sure edit form is closed when switching/unselecting rows and values will change
@@ -154,7 +145,6 @@ app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
                 $rootScope.addMyVar = !$rootScope.addMyVar
               }
             }
-
             if(lastclick == null && $scope.cliked != ""){
               Service.ChangeEntrySelected()
             }
@@ -198,8 +188,11 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
     $scope.AType = ["Boeing 747","Harrier","JumpJet"]
     $scope.id = Service.getid()
     $scope.ADescription = Service.getADescription()
+
     $scope.AOdometer = Service.getAOdometer()
     $scope.AFlag = Service.getAFlag()
+    console.log($scope.AOdometer)
+    console.log($scope.AFlag)
     $scope.id = Service.getid()
   }
 
@@ -210,13 +203,15 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
     $scope.AType = ["Boeing 747","Harrier","JumpJet"]
     $scope.id = ""
     $scope.ADescription = ""
-    $scope.AOdometer = ""
-    $scope.AFlag = ""
+    $scope.AOdometer = 0.00
+    $scope.AFlag = 0.00
     $scope.id = ""
   }
 
   //When submit button pressed send to node server
   $scope.submitEditEmployeeForm = function() {
+    console.log("AOdometer" + $scope.AOdometer)
+    console.log("AOdometer" + $scope.AFlag)
     //object containing the aircraft values
     if($scope.AOdometer > $scope.AFlag){
       $window.alert("Odometer value must be lower than flag value, please try again")
@@ -226,6 +221,8 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
         id: $scope.id, ADescription: $scope.ADescription,
         AOdometer: $scope.AOdometer, AFlag: $scope.AFlag
       }
+      console.log($scope.AOdometer)
+      console.log($scope.AFlag)
       $http({
         method : "POST",
         url : "/update",
@@ -249,7 +246,6 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
 
 app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootScope, $window){
   $rootScope.addMyVar = true
-
     //Make sure other form is closed when opening this form
     $scope.$watch('addMyVar', function(){
       if($rootScope.updateMyVar == false){
@@ -260,29 +256,31 @@ app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootSc
         }
       }
     })
-
   $rootScope.addToggle = function (){
     $rootScope.addMyVar = !$rootScope.addMyVar
     $scope.AType = ["Boeing 747","Harrier","JumpJet"]
+    //empty forms content
+    $scope.ARego = ""
+    $scope.ADescription = ""
+    $scope.AOdometer = 0.00
+    $scope.AFlag = 0.00
   }
 
   $scope.addCancel = function(){
     $rootScope.addToggle()
-
   }
 
   $scope.submitAddEmployeeForm = function(){
-    //console.log("triggered")
-    //console.log($scope.name)
-    //console.log($scope.country)
     if($scope.AOdometer > $scope.AFlag){
       $window.alert("Odometer value must be lower than flag value, please try again")
     }else{
+
       $scope.Aircraft = {
         ARego: $scope.ARego, AType: $scope.selectedType,
         id: $scope.id, ADescription: $scope.ADescription,
         AOdometer: $scope.AOdometer, AFlag: $scope.AFlag
       }
+
       $http({
         method : "POST",
         url : "/add",
@@ -293,23 +291,13 @@ app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootSc
         {
           console.log("triggered")
           $rootScope.status = response.data
-          //console.log($scope.successOrFailureAlert)
-          //$scope.successOrFailureAlert = true;
-          //$timeout(function () {$scope.successOrFailureAlert = false}, 2000)
         }
         else{
           $rootScope.status = "Succesfully Added"
           $rootScope.addToggle()
           //Service.ChangeEntrySelected()
           $rootScope.listed()
-
-          //empty forms content
-          $scope.ARego = ""
-          $scope.ADescription = ""
-          $scope.AOdometer = ""
-          $scope.AFlag = ""
         }
-
         //once toggled i.e form taken away success or failure message displayed for x time
         $rootScope.successOrFailureAlert = true;
         //console.log($scope.successOrFailureAlert)

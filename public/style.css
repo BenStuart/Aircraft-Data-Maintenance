@@ -1,10 +1,6 @@
-p{
-    margin-bottom: 0px;
-}
+p{ margin-bottom: 0px; }
 
-*{
-    font-family: "Verdana";
-}
+*{ font-family: "Verdana"; }
 
 Button:focus {
    outline: none;
@@ -75,7 +71,6 @@ Button:focus {
 .status span{
   background-color: lightGreen;
   font-size: 20px;
-
 }
 
 th, td {
