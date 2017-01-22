@@ -1,14 +1,14 @@
 var app = angular.module('myApp', [])
 
 // Data to be passed around between controllers
-app.service('Service', function(){
+app.service('Service', function($timeout){
   var id = 0
   var ARego = ""
   var AType = ""
   var ADescription = ""
   var AOdometer = 0
   var AFlag = 0
-  var entrySelected = true
+  var entrySelected = null
 
   // functions need to be returned from a service as vars are private scope
   return {
@@ -58,76 +58,117 @@ app.service('Service', function(){
 
 })
 
-app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
-    $http({
-        method : "POST",
-        url : "/list"
-    }).then(function mySucces(response) {
-        $scope.clicked = null;
-        $scope.data = response.data;
-        $scope.go = function(data){
-          var lastclick = $scope.clicked
+app.controller('deletCtrl', function($scope, $window, Service, $rootScope, $http, $timeout) {
 
-          $scope.clicked = data.ARego
-          //console.log("scope clicked: " +  $scope.clicked)
-          //console.log(data.ARego)
-          //Pass selected data to the service to be used by other controller
-          Service.setAType(data.AType)
-          Service.setARego(data.ARego)
-          Service.setAFlag(data.AFlag)
-          Service.setADescription(data.ADescription)
-          Service.setAOdometer(data.AOdometer)
-          //console.log("Data Passed From Table: " + data.name)
-          //console.log("Data Passed From Table: " + data.location)
+  $rootScope.delete = function(){
+    if (Service.CheckEntrySelected() == false || Service.CheckEntrySelected() == null){
+      $window.alert("Please select an entry first")
+    }else{
+      if(Service.getAOdometer() < 500){
+        $window.alert("Aircraft cannot be deleted, Odometer reading too low")
+      }else{
+        if (confirm('Are you sure you want to delete: ' + Service.getARego())) {
 
-          // if clicking on the same row twice, removing the row selection
-          if($scope.clicked == lastclick){
-            //console.log($rootScope.updateMyVar)
-            //make sure edit form is closed when switching/unselecting rows and values will change
-             if($rootScope.updateMyVar == false){
-               $rootScope.updateMyVar = !$rootScope.updateMyVar
-            }
+          $http({
+            method : "POST",
+            url : "/delete",
+            data: {"rego" : Service.getARego()}
+          }).then(function mySucces(response) {
+            $rootScope.status = "Entry Deleted"
 
-            //make sure add form is closed when making selections from list
-            if($rootScope.addMyVar == false){
-              $rootScope.addMyVar = !$rootScope.addMyVar
-            }
-             //console.log("change entry triggered")
-             //Trigggers the "Please select an entry first"
-             Service.ChangeEntrySelected()
-             $scope.clicked = ""
-          }
-
-          // if not clicking for the first time and the last click was nothing i.e removing a selection
-          // but now clicking on something
-          else if ($scope.clicked != "" && lastclick != null && lastclick == ""){
-            //console.log($rootScope.updateMyVar)
+            $rootScope.listed()
             Service.ChangeEntrySelected()
-          }
 
-          else if ($scope.clicked != "" && lastclick != ""){
-              //console.log("$rootScope.updateMyVar")
+            $rootScope.successOrFailureAlert = true;
+            //console.log($scope.successOrFailureAlert)
+            $timeout(function () {$rootScope.successOrFailureAlert = false}, 1000)
+          }, function myError(response) {
+          })
+        }
+      }
+    }
+  }
+
+})
+
+app.controller('listCtrl', function($scope, $http, Service, $rootScope) {
+
+    $rootScope.listed = function() {
+      $http({
+          method : "POST",
+          url : "/list"
+      }).then(function mySucces(response) {
+          $scope.clicked = null;
+          $scope.data = response.data;
+          $scope.go = function(data){
+            var lastclick = $scope.clicked
+            $scope.clicked = data.ARego
+
+            //console.log("Last Clicked: " + lastclick)
+            //console.log("scope clicked: " +  $scope.clicked)
+
+            //console.log(data.ARego)
+            //Pass selected data to the service to be used by other controller
+            Service.setAType(data.AType)
+            Service.setARego(data.ARego)
+            Service.setAFlag(data.AFlag)
+            Service.setADescription(data.ADescription)
+            Service.setAOdometer(data.AOdometer)
+            Service.setid(data.id)
+            console.log("Data id: " + data.id)
+            //console.log("Data Passed From Table: " + data.name)
+            //console.log("Data Passed From Table: " + data.location)
+
+            // if clicking on the same row twice, removing the row selection
+            if($scope.clicked == lastclick){
+              //console.log($rootScope.updateMyVar)
               //make sure edit form is closed when switching/unselecting rows and values will change
-               if($rootScope.updateMyVar == false){
+              if($rootScope.updateMyVar == false){
                  $rootScope.updateMyVar = !$rootScope.updateMyVar
               }
-
               //make sure add form is closed when making selections from list
               if($rootScope.addMyVar == false){
                 $rootScope.addMyVar = !$rootScope.addMyVar
               }
+               //console.log("change entry triggered")
+               //Trigggers the "Please select an entry first"
+               Service.ChangeEntrySelected()
+               $scope.clicked = ""
+            }
+
+            // if not clicking for the first time and the last click was nothing i.e removing a selection
+            // but now clicking on something
+            else if ($scope.clicked != "" && lastclick != null && lastclick == ""){
+              //console.log($rootScope.updateMyVar)
+              Service.ChangeEntrySelected()
+            }
+
+            else if ($scope.clicked != "" && lastclick != "" ){
+              //console.log("$rootScope.updateMyVar")
+              //make sure edit form is closed when switching/unselecting rows and values will change
+              if($rootScope.updateMyVar == false){
+                 $rootScope.updateMyVar = !$rootScope.updateMyVar
+              }
+              //make sure add form is closed when making selections from list
+              if($rootScope.addMyVar == false){
+                $rootScope.addMyVar = !$rootScope.addMyVar
+              }
+            }
+
+            if(lastclick == null && $scope.cliked != ""){
+              Service.ChangeEntrySelected()
+            }
           }
-        }
-        //console.log(JSON.stringify(response.data))
-    }, function myError(response) {
-        $scope.data = response.statusText;
-    })
+          //console.log(JSON.stringify(response.data))
+      }, function myError(response) {
+          $scope.data = response.statusText;
+      })
+    }
+    $rootScope.listed()
 })
 
-app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope, $http){
-
+app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope, $http, $timeout){
   $rootScope.updateMyVar = true
-
   //Check and make sure other form is closed when opening this form
   $scope.$watch('updateMyVar', function(){
     if($rootScope.addMyVar == false){
@@ -141,13 +182,16 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
   //Check if a valid field has been selected if so the edit button can open form
   // and continue pre-adding fields otherwise alert
   $rootScope.updateToggle = function(){
-    console.log(Service.CheckEntrySelected())
-    if (Service.CheckEntrySelected() === false){
+    if(Service.CheckEntrySelected() == null){
+      $window.alert("Please select a field to edit first")
+        return
+    }
+    console.log("EntrySelected" + Service.CheckEntrySelected())
+    if (Service.CheckEntrySelected() == false){
           $window.alert("Please select a field to edit first")
           return
     }
     $rootScope.updateMyVar = !$rootScope.updateMyVar
-
     //Pre fill info into edit forms elements
     $scope.ARego = Service.getARego()
     $scope.selectedType = Service.getAType()
@@ -156,32 +200,60 @@ app.controller('updateEntryCtrl', function($scope, Service, $window, $rootScope,
     $scope.ADescription = Service.getADescription()
     $scope.AOdometer = Service.getAOdometer()
     $scope.AFlag = Service.getAFlag()
+    $scope.id = Service.getid()
+  }
+
+  $scope.updateCancel = function(){
+    $rootScope.updateToggle()
+    $scope.ARego = ""
+    $scope.selectedType = ""
+    $scope.AType = ["Boeing 747","Harrier","JumpJet"]
+    $scope.id = ""
+    $scope.ADescription = ""
+    $scope.AOdometer = ""
+    $scope.AFlag = ""
+    $scope.id = ""
   }
 
   //When submit button pressed send to node server
   $scope.submitEditEmployeeForm = function() {
-
-    //********************* UP TO HERE ************************
     //object containing the aircraft values
-    $scope.Aircraft = {ARego: $scope.ARego, AType: $scope.AType, id: $scope.id}
-
-    $http({
-      method : "POST",
-      url : "/update",
-      data: $scope.employee,
-    }).then(function mySucces(response) {
-      $rootScope.updateToggle = !$rootScope.updateToggle
-    }, function myError(response) {
-    })
+    if($scope.AOdometer > $scope.AFlag){
+      $window.alert("Odometer value must be lower than flag value, please try again")
+    }else{
+      $scope.Aircraft = {
+        ARego: $scope.ARego, AType: $scope.selectedType,
+        id: $scope.id, ADescription: $scope.ADescription,
+        AOdometer: $scope.AOdometer, AFlag: $scope.AFlag
+      }
+      $http({
+        method : "POST",
+        url : "/update",
+        data: $scope.Aircraft
+      }).then(function mySucces(response) {
+        console.log("triggered")
+        $rootScope.listed()
+        $rootScope.updateToggle()
+        Service.ChangeEntrySelected()
+        $rootScope.status = "Entry Updated"
+        //once toggled i.e form taken away success or failure message displayed for x time
+        $rootScope.successOrFailureAlert = true;
+        //console.log($scope.successOrFailureAlert)
+        $timeout(function () {$rootScope.successOrFailureAlert = false}, 1000)
+      }, function myError(response) {
+        console.log(response)
+      })
+    }
   }
 })
 
-app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootScope){
+app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootScope, $window){
   $rootScope.addMyVar = true
 
     //Make sure other form is closed when opening this form
     $scope.$watch('addMyVar', function(){
       if($rootScope.updateMyVar == false){
+
         console.log("edit form is open")
         if($rootScope.addMyVar == false){
           $rootScope.updateMyVar =! $rootScope.updateMyVar
@@ -191,35 +263,61 @@ app.controller('addFormCtrl', function($scope, $http, $timeout, Service, $rootSc
 
   $rootScope.addToggle = function (){
     $rootScope.addMyVar = !$rootScope.addMyVar
+    $scope.AType = ["Boeing 747","Harrier","JumpJet"]
+  }
+
+  $scope.addCancel = function(){
+    $rootScope.addToggle()
+
   }
 
   $scope.submitAddEmployeeForm = function(){
     //console.log("triggered")
     //console.log($scope.name)
     //console.log($scope.country)
-    $scope.employee = {name: $scope.name, country: $scope.country}
-    $http({
-      method : "POST",
-      url : "/add",
-      data: $scope.employee,
-    }).then(function mySucces(response) {
+    if($scope.AOdometer > $scope.AFlag){
+      $window.alert("Odometer value must be lower than flag value, please try again")
+    }else{
+      $scope.Aircraft = {
+        ARego: $scope.ARego, AType: $scope.selectedType,
+        id: $scope.id, ADescription: $scope.ADescription,
+        AOdometer: $scope.AOdometer, AFlag: $scope.AFlag
+      }
+      $http({
+        method : "POST",
+        url : "/add",
+        data: $scope.Aircraft,
+      }).then(function mySucces(response) {
+        console.log(response.data)
+        if(response.data == "Cannot Add New Entry Duplicate Rego, Please try again!")
+        {
+          console.log("triggered")
+          $rootScope.status = response.data
+          //console.log($scope.successOrFailureAlert)
+          //$scope.successOrFailureAlert = true;
+          //$timeout(function () {$scope.successOrFailureAlert = false}, 2000)
+        }
+        else{
+          $rootScope.status = "Succesfully Added"
+          $rootScope.addToggle()
+          //Service.ChangeEntrySelected()
+          $rootScope.listed()
 
-        $rootScope.status = "Succesfully Added";
-        console.log(response.data.insertId)
-
-        $scope.addToggle = function (){
-          $rootScope.addMyVar = !$rootScope.addMyVar
+          //empty forms content
+          $scope.ARego = ""
+          $scope.ADescription = ""
+          $scope.AOdometer = ""
+          $scope.AFlag = ""
         }
 
         //once toggled i.e form taken away success or failure message displayed for x time
-        $scope.successOrFailureAlert = true;
-        $timeout(function () {$scope.successOrFailureAlert = false}, 2000)
-
-        $scope.name = ""
-        $scope.location = ""
-
-    }, function myError(response) {
-        $scope.status = "Add Was unsuccessful"
-    });
+        $rootScope.successOrFailureAlert = true;
+        //console.log($scope.successOrFailureAlert)
+        $timeout(function () {$rootScope.successOrFailureAlert = false}, 1000)
+      }, function myError(response) {
+        console.log(response)
+      });
+    }
   }
+
 })

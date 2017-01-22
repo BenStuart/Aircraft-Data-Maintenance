@@ -19,6 +19,7 @@ app.use(bodyParser.json());
 // static page to be served when contacted
 app.use('/',express.static(__dirname + '/public'))
 
+
 // Display DB records
 app.post('/list', function (req, res){
   var listArray = []
@@ -48,10 +49,38 @@ app.post('/list', function (req, res){
   })
 })
 
+app.post('/delete', function (req, _res){
+  console.log(req.body.rego)
+  var con = mysql.createConnection(connectInfo)
+
+  con.connect(function(err){
+    if(err){
+      console.log("Error connecting to DB")
+      return
+    }
+    console.log('Connection established')
+  })
+
+  con.query('DELETE FROM Aircraft WHERE ARego = ?',[req.body.rego],
+  function (err, result) {
+    if (err){
+      console.log(err)
+    }
+    _res.end(req.body.rego + " Deleted")
+  })
+  con.end(function(err){
+   console.log("connection terminated")
+  })
+})
+
 // Add records to DB
 app.post('/add', function (req, _res) {
   var response = 0;
-  var employee = {name:req.body.name, location:req.body.country}
+  var Aircraft = {
+    ARego:req.body.ARego, AType:req.body.AType,
+     id:req.body.id, ADescription: req.body.ADescription,
+     AOdometer: req.body.AOdometer,AFlag: req.body.AFlag
+   }
   //console.log(JSON.stringify(employees))
   var con = mysql.createConnection(connectInfo)
   con.connect(function(err){
@@ -61,22 +90,45 @@ app.post('/add', function (req, _res) {
     }
     console.log('Connection established')
   })
-  con.query('INSERT INTO employees SET ?', employee, function(err, res){
-    // send response passed on success or failure of post
+
+
+  con.query('SELECT count(*) AS duplicate_count FROM ( SELECT ARego FROM Aircraft GROUP BY ARego=? HAVING COUNT(*) = 1) AS t',[Aircraft.ARego],
+  function (err, res){
     if(err){
-      _res.end(JSON.stringify(err))
+      console.log(err)
     }
-    _res.end(JSON.stringify(res))
+    console.log("Response from Count:" + JSON.stringify(res))
+    //console.log(res.Rego)
+    //console.log(res[0].Rego)
+
+    if(res[0].duplicate_count < 1){
+      con.query('INSERT INTO Aircraft SET ?', Aircraft, function(err, res){
+        // send response passed on success or failure of post
+        if(err){
+          console.log(err)
+          _res.end(JSON.stringify(err))
+        }
+        console.log(res)
+        _res.end("successfully added")
+      })
+      con.end(function(err){
+       console.log("connection terminated")
+      })
+      //console.log("response here" + response)
+    }else{
+      _res.end("Cannot Add New Entry Duplicate Rego, Please try again!")
+    }
   })
-  con.end(function(err){
-    console.log("connection terminated")
-  })
-  console.log("response here" + response)
 })
 
-
 app.post('/update', function (req, _res) {
-  var employee = {name:req.body.name, location:req.body.country, id:req.body.id}
+  var Aircraft = {
+    ARego:req.body.ARego, AType:req.body.AType,
+     id:req.body.id, ADescription: req.body.ADescription,
+     AOdometer: req.body.AOdometer,AFlag: req.body.AFlag
+   }
+   console.log(JSON.stringify(Aircraft))
+
   //console.log(JSON.stringify(employees))
   var con = mysql.createConnection(connectInfo)
   con.connect(function(err){
@@ -87,17 +139,15 @@ app.post('/update', function (req, _res) {
     console.log('Connection established')
   })
 
-  console.log(employee.name)
-  console.log(employee.location)
-  console.log(employee.id)
-
-  con.query( 'UPDATE employees SET location = ?, name = ?  Where ID = ?',
-  [employee.location, employee.name, employee.id],
+  con.query( 'UPDATE Aircraft SET ARego = ?, AType = ?, ADescription = ?, AOdometer = ?, AFlag = ?  Where id = ?',
+  [Aircraft.ARego, Aircraft.AType, Aircraft.ADescription, Aircraft.AOdometer, Aircraft.AFlag, Aircraft.id],
   function (err, res) {
     // send response passed on success or failure of post
     if(err){
+      console.log(err)
       _res.end(JSON.stringify(err))
     }
+      console.log(res)
     _res.end(JSON.stringify(res))
   })
 
@@ -105,7 +155,6 @@ app.post('/update', function (req, _res) {
     console.log("connection terminated")
   })
 })
-
 
 //listening on
 app.listen(3000, function () {

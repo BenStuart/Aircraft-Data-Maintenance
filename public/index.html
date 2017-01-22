@@ -14,8 +14,9 @@
 
       <!-- displaying and interacting with list section -->
        <div ng-controller="listCtrl">
-          <table border="1">
+          <table border="0">
             <tr>
+              <th>ID</th>
               <th>Rego</th>
               <th>Type</th>
               <th>Description</th>
@@ -25,6 +26,7 @@
             <!-- ng-class used to {[css class to be used] : [compare current looped row with clicked row]} -->
             <!-- selectedrow css will be apllied to row where row equals clicked row -->
             <tr ng-repeat="x in data" ng-click="go(x)" ng-class="{'selectedrow': x.ARego === clicked}">
+              <td>{{x.id}}</td>
               <td>{{x.ARego}}</td>
               <td>{{x.AType}}</td>
               <td>{{x.ADescription}}</td>
@@ -32,11 +34,16 @@
               <td>{{x.AFlag}}</td>
             </tr>
           </table>
-          <h4>Selected: {{clicked}}</h4>
+          <!-- <h4>Selected: {{clicked}}</h4> -->
       </div>
 
-<button class="addButton" ng-click="addToggle()"> Add </button>
-<button class="editButton" ng-click="updateToggle()"> Edit</button>
+<h4 class=status ng-show="successOrFailureAlert"> <span> {{status}} </span> </h4>
+<button class="Button" ng-click="addToggle()"> Add </button>
+<button class="Button" ng-click="updateToggle()"> Edit</button>
+
+<div ng-controller="deletCtrl">
+<button type="Button" class="Button" ng-click="delete()"> Delete </button>
+</div>
 
 <!-- <div ng-controller="updateEntryCtrl">
   <button class="editButton" ng-click="toggle()"> Update </button>
@@ -45,31 +52,41 @@
       <!-- add form section -->
       <div ng-controller="addFormCtrl">
         <!-- <button class="addButton" ng-click="toggle()"> Add Employee </button> -->
-        <span ng-show="successOrFailureAlert"> {{status}} </span>
-        <form class="addButtonForm" ng-hide="addMyVar" ng-submit="submitAddEmployeeForm()">
+        <form class="Form" ng-hide="addMyVar" ng-submit="submitAddEmployeeForm()">
           <h3> Add Aircraft Form </h3>
-          <input type="text" ng-model="name" />
-          <input type="text" ng-model="country" />
-          <input type="submit" value="Submit" />
-        </form>
-      </div>
-
-      <div ng-controller="updateEntryCtrl">
-        <!-- <button class="editButton" ng-click="toggle()"> Edit Employee </button> -->
-        <form class="editButtonForm" ng-hide="updateMyVar" ng-submit="submitEditEmployeeForm()">
-          <h3> Edit Aircraft Form </h3>
           <p> Rego </p>
-          <input type="text" ng-model="ARego" />
+          <input type="text" ng-model="ARego"  />
           <p> Type </p>
           <select ng-model="selectedType" ng-options="x for x in AType" ></select>
           <p> Description </p>
           <input type="text" ng-model="ADescription" />
           <p> Odometer </p>
-          <input type="number" ng-model="AOdometer" />
+          <input type="number" ng-model="AOdometer" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" required/>
           <p> Flag </p>
-          <input type="number" ng-model="AFlag" />
+          <input type="number" ng-model="AFlag" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" required/>
           <br>
-          <input type="submit" value="Submit" />
+          <input class="Submit" type="submit" value="Submit" />
+          <button class="Submit" type="button" ng-click="addCancel()"> Cancel </button>
+        </form>
+      </div>
+
+      <div ng-controller="updateEntryCtrl">
+        <!-- <button class="editButton" ng-click="toggle()"> Edit Employee </button> -->
+        <form class="Form" ng-hide="updateMyVar" ng-submit="submitEditEmployeeForm()">
+          <h3> Edit Aircraft Form </h3>
+          <p> Rego </p>
+          <input type="text" ng-model="ARego" ng-disabled="true" />
+          <p> Type </p>
+          <select ng-model="selectedType" ng-options="x for x in AType" ></select>
+          <p> Description </p>
+          <input type="text" ng-model="ADescription" />
+          <p> Odometer </p>
+          <input type="number" ng-model="AOdometer" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" required/>
+          <p> Flag </p>
+          <input type="number" ng-model="AFlag" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" required/>
+          <br>
+          <input class="Submit" type="submit" value="Submit" />
+          <button class="Submit" type="button" ng-click="updateCancel()"> Cancel </button>
         </form>
       </div>
 

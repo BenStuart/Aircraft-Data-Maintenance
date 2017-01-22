@@ -1,16 +1,99 @@
-.inputAndButton {
-  margin:20px;
+p{
+    margin-bottom: 0px;
 }
 
-.selectedrow {
-  background-color: red;
+*{
+    font-family: "Verdana";
 }
 
-.editButton, .addButton {
+Button:focus {
+   outline: none;
+   border: 0;
+}
+
+.status.ng-hide:not(.ng-hide-animate){
+  visibility: hidden !important;
+  display: block !important;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-left: 10px;
+  height:20px;
+}
+
+.Submit {
+  border: none;
+  float: left;
+  margin-right: 10px;
+  margin-top: 10px;
+  background-color:#2dabf9;
+  display:inline-block;
+  cursor:pointer;
+  color:#ffffff;
+  font-size:15px;
+  padding:6px 18px;
+  margin-bottom:10px;
+  text-decoration:none;
+}
+
+.Button {
+  border: none;
   float: left;
   margin: 10px;
+	background-color:#2dabf9;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-size:15px;
+	padding:9px 23px;
+	text-decoration:none;
+}
+.Button:hover, .Submit:hover {
+	background-color:#0688fa;
+}
+.Button:active, .Submit:active {
+	position:relative;
+	top:1px;
 }
 
-.editButtonForm, .addButtonForm{
+
+.selectedrow {
+  background-color: #79d0ff;
+}
+
+.Form{
   clear:both;
+  margin:10px;
+}
+
+.status{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-left: 10px;
+  height: 20px;
+}
+
+.status span{
+  background-color: lightGreen;
+  font-size: 20px;
+
+}
+
+th, td {
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+tr:hover td{
+  background-color:rgba(121,208,255,0.5);
+}
+
+th {
+  padding:20px;
+  background-color: #3face6;
+  color:white;
+}
+
+
+.inputAndButton {
+  margin:20px;
 }
